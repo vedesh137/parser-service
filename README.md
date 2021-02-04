@@ -1,4 +1,4 @@
-#Transcript Parser Service
+# Transcript Parser Service
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://www.postman.com/run-collection/eb4383a1dc7746205c44)
 
