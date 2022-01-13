@@ -14,7 +14,9 @@ express()
   .get('/', (req, res) => res.render('pages/index'))
   .post('/parseForm', upload.single('file'), async (req, res)=>{
     const { parsedText, ...data} = await parse(req.file.buffer);
+    console.log(Object.keys(data));
     res.render('pages/result', {data, parsedText});
+    //res.send(data);
   })
   .post('/parse', upload.single('file'), async (req, res)=>{
     if(!('file' in req))

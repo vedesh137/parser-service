@@ -34,6 +34,20 @@ function decode(token){
     return token;
 }
 
+function isUpper(str) {
+    return !/[a-z]/.test(str) && /[A-Z]/.test(str);
+}
+
+function isInt(str){
+    return /^[1-9]\d*$/.test(str);
+}
+
+function isPassingGrade(code){
+    singleLetters =["A","B","C","P"];
+    otherCodes = ["EC","EX"]; 
+    return singleLetters.includes(code[0]) || otherCodes.includes(code);
+ } 
+
  /**
   * 
   * @param {*} text - data retrieved from parsing with pdfParser and flattening with getPDFText()
@@ -46,19 +60,44 @@ function getStudentData(text, filename){
         id:undefined,
         gpa:undefined,
         fullname: undefined,
-        comp2606:'N/A',
-        info2602:'N/A',
-        comp2611:'N/A',
-        comp2605:'N/A',
         parsedText: undefined
     }
 
     if(filename)
         student.filename = filename;
 
+    let printTable = false;
+
     let i = 0;
     for(let token of text){
 
+        if(token == "R"){
+            printTable = true;
+        }
+
+        if(printTable == true){
+            if(isUpper(token) && token.length == 4 && isInt(text[i+1])){
+                grade = decodeURI(text[i+5]).trim();
+                courseNum = text[i+1];
+                courseCode = token;
+                
+                course = courseCode + " " + courseNum;
+                passed = isPassingGrade(grade);
+                
+                if(passed){
+                    student[course] = "";
+                    console.log( course +"\t"+grade);
+
+                }
+                    
+                    
+            }
+        }
+
+        if(printTable == true && token == "Term%20Totals")
+            printTable = false;
+
+        
         if(token === "Record%20of%3A")
             student.fullname = decode(text[i-1])
 
@@ -75,6 +114,7 @@ function getStudentData(text, filename){
             student.id = text[ i + 1]
         }
 
+        /*
         //we want the grades of 4 specific courses
         if(courses.includes(token)){
             // console.log(token, decode(text[i + 4]));
@@ -92,6 +132,7 @@ function getStudentData(text, filename){
             else
                 student[`info${token}`] = 'IP'; //indicate In Progress
         }
+        */
             
         i++;
     }
