@@ -48,98 +48,94 @@ function isPassingGrade(code){
     return singleLetters.includes(code[0]) || otherCodes.includes(code);
  } 
 
+ function isGrade(code){
+    singleLetters =["A","B","C","P", "F"];
+    otherCodes = ["EC","EX"]; 
+    return singleLetters.includes(code[0]) || otherCodes.includes(code);
+ } 
+
  /**
   * 
   * @param {*} text - data retrieved from parsing with pdfParser and flattening with getPDFText()
   * @param {*} filename - name of file
   */
-function getStudentData(text, filename){
+
+function getStudentData(text, filename) {
     let inprogress = false;
     let courses = ["2605", "2606", "2611"];
     let student = {
-        id:undefined,
-        gpa:undefined,
+        id: undefined,
+        gpa: undefined,
         fullname: undefined,
-        parsedText: undefined
-    }
+        courses: {} 
+    };
 
-    if(filename)
-        student.filename = filename;
+    if (filename) student.filename = filename;
 
     let printTable = false;
 
     let i = 0;
-    for(let token of text){
-
-        if(token == "R"){
+    for (let token of text) {
+        if (token == "R") {
             printTable = true;
         }
 
-        if(printTable == true){
-            if(isUpper(token) && token.length == 4 && isInt(text[i+1])){
-                grade = decodeURI(text[i+5]).trim();
-                courseNum = text[i+1];
+        if (printTable == true) {
+            if (isUpper(token) && token.length == 4 && isInt(text[i + 1])) {
+                grade = decodeURI(text[i + 5]).trim();
+                grade = decode(grade);
+                courseNum = text[i + 1];
                 courseCode = token;
-                
+
                 course = courseCode + " " + courseNum;
                 passed = isPassingGrade(grade);
-                
-                if(passed){
-                    student[course] = "";
-                    console.log( course +"\t"+grade);
+                validGrade = isGrade(grade);
 
-                }
-                    
-                    
+                if (validGrade)
+                student.courses[course] = grade;
+
+
+                //if (passed) {
+                    // Store course and grade in the student object
+                    //student.courses[course] = grade;
+                    //console.log(course + "\t" + grade);
+                //}
             }
         }
 
-        if(printTable == true && token == "Term%20Totals")
-            printTable = false;
+        if (printTable == true && token == "Term%20Totals") printTable = false;
 
-        
-        if(token === "Record%20of%3A")
-            student.fullname = decode(text[i-1])
+        if (token === "Record%20of%3A") student.fullname = decode(text[i - 1]);
 
-        //reached the courses in progress section of transcript
-        if(!inprogress && token === "In%20Progress%20Courses%3A"){
+        // Reached the courses in progress section of transcript
+        if (!inprogress && token === "In%20Progress%20Courses%3A") {
             inprogress = true;
         }
 
-        if(token === "DEGREE%20GPA%20TOTALS"){
-            student.gpa = text[i - 1]; 
+        if (token === "DEGREE%20GPA%20TOTALS") {
+            student.gpa = text[i - 1];
         }
 
-        if(token === "Record%20of%3A"){
-            student.id = text[ i + 1]
+        if (token === "Record%20of%3A") {
+            student.id = text[i + 1];
         }
-
-        /*
-        //we want the grades of 4 specific courses
-        if(courses.includes(token)){
-            // console.log(token, decode(text[i + 4]));
-            //grade column is 4 cols after the course column
-            if(!inprogress)
-                student[`comp${token}`] = decode(text[i + 4]); //pull grade
-            else
-                student[`comp${token}`] = 'IP'; //indicate In Progress
-        }
-
-        if(token === '2602' && text[i - 1]==='INFO'){
-           
-            if(!inprogress)
-                student[`info${token}`] = decode(text[i + 4]); //pull grade
-            else
-                student[`info${token}`] = 'IP'; //indicate In Progress
-        }
-        */
-            
         i++;
     }
 
     student.parsedText = text;
+    console.log("Printing Student data");
+    console.log(student.id);
+    console.log(student.gpa);
+    console.log(student.fullname);
+    console.log("Printing Student courses");
+    console.log(student.courses);
 
-    return student;
+    return {
+        id: student.id,
+        gpa: student.gpa,
+        fullname: student.fullname,
+        courses: student.courses
+    };
 }
 
 async function parse(file){
