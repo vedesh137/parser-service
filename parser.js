@@ -31,6 +31,7 @@ async function getPDFText(fileBuffer){
 function decode(token){
     token = token.replace(/\%2B/g, '+');
     token = token.replace(/\%20/g, ' ');
+    token = token.replace(/\%2F/g, '/');
     return token;
 }
 
@@ -60,24 +61,36 @@ function isPassingGrade(code){
   * @param {*} filename - name of file
   */
 
-function getStudentData(text, filename) {
+ function getStudentData(text, filename) {
     let inprogress = false;
-    let courses = ["2605", "2606", "2611"];
     let student = {
         id: undefined,
         gpa: undefined,
         fullname: undefined,
-        courses: {} 
+        courses: {},
+        inProgressCourses: {} 
     };
 
     if (filename) student.filename = filename;
 
     let printTable = false;
+    let currentSemesterCourses = {}; // To store courses for the current semester
 
     let i = 0;
     for (let token of text) {
-        if (token == "R") {
-            printTable = true;
+        if (token.includes("Semester")) {
+            // Check if the token indicates a new semester
+            printTable = !printTable; //Toggling printTable
+            if (printTable) {
+                // If starting a new semester, clear the current semester courses
+                currentSemesterCourses = {};
+
+                //courseNum = text[i + 1];
+                //courseCode = token;
+                //course = token;
+                course = decode(token)
+                currentSemesterCourses[course] = "";
+            }
         }
 
         if (printTable == true) {
@@ -92,14 +105,13 @@ function getStudentData(text, filename) {
                 validGrade = isGrade(grade);
 
                 if (validGrade)
-                student.courses[course] = grade;
+                    currentSemesterCourses[course] = grade;
 
+                if (inprogress)
+                    student.inProgressCourses[course] = "";
 
-                //if (passed) {
-                    // Store course and grade in the student object
-                    //student.courses[course] = grade;
-                    //console.log(course + "\t" + grade);
-                //}
+                // Store all courses (including those in progress) in the student object
+                student.courses = { ...student.courses, ...currentSemesterCourses };
             }
         }
 
@@ -123,20 +135,32 @@ function getStudentData(text, filename) {
     }
 
     student.parsedText = text;
+
+    // Print courses for the current semester
+    // console.log("Courses for the current semester:");
+    // console.log(student.currentSemesterCourses);
+
     console.log("Printing Student data");
     console.log(student.id);
     console.log(student.gpa);
     console.log(student.fullname);
+    console.log("Printing inProgress Courses");
+    console.log(student.inProgressCourses);
     console.log("Printing Student courses");
     console.log(student.courses);
+    console.log(student.parsedText);
 
     return {
         id: student.id,
         gpa: student.gpa,
         fullname: student.fullname,
-        courses: student.courses
+        courses: student.courses,
+        parsedText: student.parsedText,
+        inProgressCourses: student.inProgressCourses
     };
 }
+
+
 
 async function parse(file){
     const text = await getPDFText(file);
