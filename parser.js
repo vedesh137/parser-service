@@ -80,15 +80,13 @@ function isPassingGrade(code){
     for (let token of text) {
         if (token.includes("Semester")) {
             // Check if the token indicates a new semester
-            printTable = !printTable; //Toggling printTable
+            printTable = !printTable; // Toggling printTable
             if (printTable) {
                 // If starting a new semester, clear the current semester courses
                 currentSemesterCourses = {};
 
-                //courseNum = text[i + 1];
-                //courseCode = token;
-                //course = token;
-                course = decode(token)
+                // Course code for the current semester
+                course = decode(token);
                 currentSemesterCourses[course] = "";
             }
         }
@@ -115,30 +113,37 @@ function isPassingGrade(code){
             }
         }
 
-        if (printTable == true && token == "Term%20Totals") printTable = false;
+        if (printTable == true && token == "Term%20Totals")
+            printTable = false;
 
-        if (token === "Record%20of%3A") student.fullname = decode(text[i - 1]);
+        if (token === "Record%20of%3A")
+            student.fullname = decode(text[i - 1]);
 
         // Reached the courses in progress section of transcript
-        if (!inprogress && token === "In%20Progress%20Courses%3A") {
+        if (!inprogress && token === "In%20Progress%20Courses%3A")
             inprogress = true;
-        }
 
-        if (token === "DEGREE%20GPA%20TOTALS") {
+        if (token === "DEGREE%20GPA%20TOTALS")
             student.gpa = text[i - 1];
-        }
 
-        if (token === "Record%20of%3A") {
+        if (token === "Record%20of%3A")
             student.id = text[i + 1];
-        }
+
         i++;
     }
 
     student.parsedText = text;
 
-    // Print courses for the current semester
-    // console.log("Courses for the current semester:");
-    // console.log(student.currentSemesterCourses);
+    if (inprogress) {
+    // Move the last key from courses to inProgressCourses
+    let keys = Object.keys(student.courses);
+    let lastKey = keys[keys.length - 1];
+    if (lastKey) {
+    // Insert at the top of inProgressCourses object
+        student.inProgressCourses = { [lastKey]: student.courses[lastKey], ...student.inProgressCourses };
+        delete student.courses[lastKey];
+    }
+}
 
     console.log("Printing Student data");
     console.log(student.id);
@@ -155,10 +160,11 @@ function isPassingGrade(code){
         gpa: student.gpa,
         fullname: student.fullname,
         courses: student.courses,
-        parsedText: student.parsedText,
+        //parsedText: student.parsedText,
         inProgressCourses: student.inProgressCourses
     };
 }
+
 
 
 
