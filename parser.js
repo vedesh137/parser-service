@@ -32,6 +32,7 @@ function decode(token){
     token = token.replace(/\%2B/g, '+');
     token = token.replace(/\%20/g, ' ');
     token = token.replace(/\%2F/g, '/');
+    token = token.replace(/\%26/g, '&');
     return token;
 }
 
@@ -67,6 +68,11 @@ function isPassingGrade(code){
         id: undefined,
         gpa: undefined,
         fullname: undefined,
+        admittedTerm: undefined,
+        degree: undefined,
+        faculty: undefined,
+        department: undefined,
+        major: undefined,
         courses: {},
         inProgressCourses: {} 
     };
@@ -129,6 +135,32 @@ function isPassingGrade(code){
         if (token === "Record%20of%3A")
             student.id = text[i + 1];
 
+        if (token === 'Degree%20GPA%3A'){
+            sem = text[i + 1];
+            student.admittedTerm = (decode(sem))
+        }
+        
+        if (token === 'Degree%20GPA%3A'){
+            degree = text[i + 3];
+            student.degree = (decode(degree))
+       }
+
+       if (token === 'Degree%20GPA%3A'){
+            faculty = text[i + 4];
+            student.faculty = (decode(faculty))
+        }
+    
+       if (token === 'Degree%20GPA%3A'){
+            department = text[i + 6];
+            student.department = (decode(department))
+        }
+
+       if (token === 'Degree%20GPA%3A'){
+            major = text[i + 7];
+            student.major = (decode(major))
+        }
+        
+
         i++;
     }
 
@@ -159,6 +191,11 @@ function isPassingGrade(code){
         id: student.id,
         gpa: student.gpa,
         fullname: student.fullname,
+        admittedTerm: student.admittedTerm,
+        degree: student.degree,
+        faculty: student.faculty,
+        department: student.department,
+        major: student.major,
         courses: student.courses,
         //parsedText: student.parsedText,
         inProgressCourses: student.inProgressCourses
