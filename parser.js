@@ -146,7 +146,7 @@ function isPassingGrade(code){
        }
 
        if (token === 'Degree%20GPA%3A'){
-            faculty = text[i + 4];
+            faculty = text[i + 5];
             student.faculty = (decode(faculty))
         }
     
