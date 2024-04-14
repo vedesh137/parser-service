@@ -73,6 +73,7 @@ function isPassingGrade(code){
         faculty: undefined,
         department: undefined,
         major: undefined,
+        programme: undefined,
         courses: {},
         inProgressCourses: {} 
     };
@@ -146,17 +147,22 @@ function isPassingGrade(code){
        }
 
        if (token === 'Degree%20GPA%3A'){
+        programme = text[i + 4];
+        student.programme = (decode(programme))
+   }
+
+       if (token === 'Degree%20GPA%3A'){
             faculty = text[i + 5];
             student.faculty = (decode(faculty))
         }
     
        if (token === 'Degree%20GPA%3A'){
-            department = text[i + 6];
+            department = text[i + 7];
             student.department = (decode(department))
         }
 
        if (token === 'Degree%20GPA%3A'){
-            major = text[i + 7];
+            major = text[i + 8];
             student.major = (decode(major))
         }
         
@@ -193,6 +199,7 @@ function isPassingGrade(code){
         fullname: student.fullname,
         admittedTerm: student.admittedTerm,
         degree: student.degree,
+        programme: student.programme,
         faculty: student.faculty,
         department: student.department,
         major: student.major,
